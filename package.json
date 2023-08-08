@@ -1,0 +1,30 @@
+{
+  "name": "canyon-stock-alert",
+  "version": "1.0.0",
+  "description": "A scrapper that monitors desired bikes on stock at Canyon website",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "env": "cp .env.sample .env && open .env"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcelorodrigo/canyon-stock-alert.git"
+  },
+  "keywords": [
+    "canyon",
+    "bike",
+    "stock"
+  ],
+  "author": "Marcelo Rodrigo Wiebbelling",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marcelorodrigo/canyon-stock-alert/issues"
+  },
+  "homepage": "https://github.com/marcelorodrigo/canyon-stock-alert#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsdom": "^22.1.0"
+  }
+}
