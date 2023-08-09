@@ -19,7 +19,7 @@ To run the script, ensure you have **Node.js v18** or above installed on your sy
 1. Run `npm install` to install the required dependencies.
 2. Execute `npm run env` to create a default `.ENV` file. (or manually copy it from `.env_sample`)
 3. Execute `npm start` to start the monitoring.
-4. If you plan to run as a console application on your *nix system, please use `nohup npm start > output.log &`
+4. If you plan to run as a console application on your *nix system, please use `((npm start > output.log &)&)`
 
 The script will periodically check for the availability of the specified bike size. If the desired size becomes available, you will receive a notification on Telegram. Additionally, the script will send a status message every 12 hours to confirm that it's running as expected.
 
