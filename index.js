@@ -4,20 +4,39 @@ const dotenv = require('dotenv').config();
 const { JSDOM } = jsdom;
 
 const app = express()
-const intervalMilis = process.env.INTERVAL ? parseInt(process.env.INTERVAL) : null
-const bikeUrls = JSON.parse(process.env.BIKE_URLS.replace(/'/g, '"'))
-const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
-
 const validations = require('./validations');
 validations.validateEnv();
+
+const interval = parseInt(process.env.INTERVAL) || 6;
+const bikeUrls = JSON.parse(process.env.BIKE_URLS.replace(/'/g, '"'))
+const port = parseInt(process.env.PORT) || 3000;
 
 
 let lastUptimeCheckDate = Date.now()
 
+const log = (message) => {
+    console.log(`[${new Date().toString()}] ${message}`);
+}
+
+const fetchWithTimeout = async (resource, options = {}) => {
+    const { timeout: fetchTimeOut = 8000 } = options;
+
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), fetchTimeOut);
+
+    const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal
+    });
+    clearTimeout(id);
+
+    return response;
+}
+
 const sendMessage = async (message) => {
-    console.log('[' + new Date().toString() + `] Sending message: ${message}\n`);
+    log(`Sending message: ${message}`)
     try {
-        await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`, {
+        await fetchWithTimeout(`https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
@@ -42,7 +61,8 @@ const checkBikeAvailability = async () => {
 
     for (const url of bikeUrls) {
         try {
-            const response = await fetch(url)
+            log('Fetching ' + url);
+            const response = await fetchWithTimeout(url)
             const html = await response.text()
             const { document } = new JSDOM(html).window
             const desiredSize = document.querySelector(`.productConfiguration__optionListItem .productConfiguration__selectVariant[data-product-size="${process.env.BIKE_SIZE}"]`).innerHTML
@@ -56,9 +76,10 @@ const checkBikeAvailability = async () => {
             console.error('There seems to be an error:', error)
         }
     }
+    log('End monitoring');
 };
 
 app.listen(port, () => {
-    sendMessage('Starting monitoring for ' + bikeUrls.length + ' bike(s) ...')
-    setInterval(checkBikeAvailability, intervalMilis)
+    sendMessage(`Starting monitoring for ${bikeUrls.length} bike(s) every ${interval} minute(s).`);
+    setInterval(checkBikeAvailability, interval * 60 * 1000);
 });
