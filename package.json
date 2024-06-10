@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/marcelorodrigo/canyon-stock-alert#readme",
   "dependencies": {
-    "dotenv": "^16.3.2",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsdom": "^24.1.0"
   },
