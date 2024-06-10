@@ -2,9 +2,9 @@
   "name": "canyon-stock-alert",
   "version": "1.0.0",
   "description": "A scrapper that monitors desired bikes on stock at Canyon website",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "node index",
+    "start": "ts-node index.ts",
     "env": "cp .env.sample .env && open .env"
   },
   "repository": {
@@ -26,5 +26,10 @@
     "dotenv": "^16.3.2",
     "express": "^4.19.2",
     "jsdom": "^24.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }

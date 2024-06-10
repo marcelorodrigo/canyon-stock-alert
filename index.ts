@@ -1,30 +1,36 @@
-const express = require('express');
-const jsdom = require('jsdom');
-const dotenv = require('dotenv').config();
-const { JSDOM } = jsdom;
+import fs from 'fs'
+const express = require('express')
+const jsdom = require('jsdom')
+const dotenv = require('dotenv').config()
+const {JSDOM} = jsdom
+
+if(!fs.existsSync('.env')) {
+    console.error('It looks like the .env file does not exist. Please run `npm run env` to create it.')
+    process.exit(1)
+}
+
 
 const app = express()
-const validations = require('./validations');
-validations.validateEnv();
+const validations = require('./validations')
+validations.validateEnv()
 
-const interval = parseInt(process.env.INTERVAL) || 6;
-const bikeUrls = JSON.parse(process.env.BIKE_URLS.replace(/'/g, '"'))
-const port = parseInt(process.env.PORT) || 3000;
+const interval: number = process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 6
+const bikeUrls = process.env.BIKE_URLS ? JSON.parse(process.env.BIKE_URLS.replace(/'/g, '"')) : []
+const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000
+const timeout: number = 8_000
 
 
 let lastUptimeCheckDate = Date.now()
 
-const log = (message) => {
+const log = (message: string) => {
     console.log(`[${new Date().toString()}] ${message}`);
 }
 
-const fetchWithTimeout = async (resource, options = {}) => {
-    const { timeout: fetchTimeOut = 8000 } = options;
+const fetchWithTimeout = async (resource: string, options: {} = {}): Promise<Response> => {
+    const controller: AbortController = new AbortController();
+    const id: NodeJS.Timeout = setTimeout(() => controller.abort(), timeout);
 
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), fetchTimeOut);
-
-    const response = await fetch(resource, {
+    const response: Response = await fetch(resource, {
         ...options,
         signal: controller.signal
     });
@@ -33,7 +39,7 @@ const fetchWithTimeout = async (resource, options = {}) => {
     return response;
 }
 
-const sendMessage = async (message) => {
+const sendMessage = async (message: string): Promise<void> => {
     log(`Sending message: ${message}`)
     try {
         await fetchWithTimeout(`https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`, {
@@ -51,8 +57,8 @@ const sendMessage = async (message) => {
     }
 };
 
-const checkBikeAvailability = async () => {
-    let isBikeAvailableToBuy = false;
+const checkBikeAvailability = async (): Promise<void> => {
+    let isBikeAvailableToBuy: boolean = false;
 
     if (Date.now() - lastUptimeCheckDate > 12 * 60 * 60 * 1000) {
         lastUptimeCheckDate = Date.now()
@@ -62,9 +68,9 @@ const checkBikeAvailability = async () => {
     for (const url of bikeUrls) {
         try {
             log('Fetching ' + url);
-            const response = await fetchWithTimeout(url)
-            const html = await response.text()
-            const { document } = new JSDOM(html).window
+            const response: Response = await fetchWithTimeout(url)
+            const html: string = await response.text()
+            const {document} = new JSDOM(html).window
             const desiredSize = document.querySelector(`.productConfiguration__optionListItem .productConfiguration__selectVariant[data-product-size="${process.env.BIKE_SIZE}"]`).innerHTML
 
             isBikeAvailableToBuy = !desiredSize.includes('Notify')
@@ -79,7 +85,7 @@ const checkBikeAvailability = async () => {
     log('End monitoring');
 };
 
-app.listen(port, () => {
+app.listen(port, (): void => {
     sendMessage(`Starting monitoring for ${bikeUrls.length} bike(s) every ${interval} minute(s).`);
     setInterval(checkBikeAvailability, interval * 60 * 1000);
 });
