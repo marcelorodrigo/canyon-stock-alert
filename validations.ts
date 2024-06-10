@@ -1,4 +1,4 @@
-function isValidURL(url) {
+function isValidURL(url: string) {
     try {
         new URL(url);
         return true;
@@ -8,10 +8,10 @@ function isValidURL(url) {
 }
 
 function validateEnv() {
-    const intervalMilis = process.env.INTERVAL ? parseInt(process.env.INTERVAL) : null;
-    const bikeUrls = JSON.parse(process.env.BIKE_URLS.replace(/'/g, '"'));
+    const intervalMillis = process.env.INTERVAL ? parseInt(process.env.INTERVAL) : null;
+    const bikeUrls = process.env.BIKE_URLS ? JSON.parse(process.env.BIKE_URLS.replace(/'/g, '"')) : [];
 
-    if (intervalMilis === null || intervalMilis < 1) {
+    if (intervalMillis === null || intervalMillis < 1) {
         throw new Error('Invalid interval. Please set process.env.INTERVAL to a value greater than or equal to 1.');
     }
 
