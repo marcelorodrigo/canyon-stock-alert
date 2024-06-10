@@ -1,4 +1,4 @@
-function isValidURL(url: string) {
+export function isValidURL(url: string): boolean {
     try {
         new URL(url);
         return true;
@@ -7,7 +7,7 @@ function isValidURL(url: string) {
     }
 }
 
-function validateEnv() {
+export function validateEnv(): void {
     const intervalMillis = process.env.INTERVAL ? parseInt(process.env.INTERVAL) : null;
     const bikeUrls = process.env.BIKE_URLS ? JSON.parse(process.env.BIKE_URLS.replace(/'/g, '"')) : [];
 
@@ -31,8 +31,3 @@ function validateEnv() {
         throw new Error('BIKE_SIZE is missing. Please provide a valid token in your .env file.');
     }
 }
-
-module.exports = {
-    isValidURL,
-    validateEnv,
-};

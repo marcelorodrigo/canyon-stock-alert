@@ -1,8 +1,8 @@
 import fs from 'fs'
-const express = require('express')
-const jsdom = require('jsdom')
-const dotenv = require('dotenv').config()
-const {JSDOM} = jsdom
+import express, {Express} from 'express'
+import { JSDOM } from 'jsdom'
+import dotenv from 'dotenv'
+dotenv.config()
 
 if(!fs.existsSync('.env')) {
     console.error('It looks like the .env file does not exist. Please run `npm run env` to create it.')
@@ -10,8 +10,8 @@ if(!fs.existsSync('.env')) {
 }
 
 
-const app = express()
-const validations = require('./validations')
+const app: Express = express()
+import * as validations from './validations'
 validations.validateEnv()
 
 const interval: number = process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 6
@@ -23,20 +23,19 @@ const timeout: number = 8_000
 let lastUptimeCheckDate = Date.now()
 
 const log = (message: string) => {
-    console.log(`[${new Date().toString()}] ${message}`);
+    console.log(`[${new Date().toString()}] ${message}`)
 }
 
 const fetchWithTimeout = async (resource: string, options: {} = {}): Promise<Response> => {
-    const controller: AbortController = new AbortController();
-    const id: NodeJS.Timeout = setTimeout(() => controller.abort(), timeout);
+    const controller: AbortController = new AbortController()
+    const id: NodeJS.Timeout = setTimeout(() => controller.abort(), timeout)
 
     const response: Response = await fetch(resource, {
         ...options,
         signal: controller.signal
-    });
-    clearTimeout(id);
-
-    return response;
+    })
+    clearTimeout(id)
+    return response
 }
 
 const sendMessage = async (message: string): Promise<void> => {
@@ -53,7 +52,7 @@ const sendMessage = async (message: string): Promise<void> => {
             }),
         })
     } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Error sending message:', error)
     }
 };
 
@@ -71,9 +70,13 @@ const checkBikeAvailability = async (): Promise<void> => {
             const response: Response = await fetchWithTimeout(url)
             const html: string = await response.text()
             const {document} = new JSDOM(html).window
-            const desiredSize = document.querySelector(`.productConfiguration__optionListItem .productConfiguration__selectVariant[data-product-size="${process.env.BIKE_SIZE}"]`).innerHTML
+            const element = document.querySelector(`.productConfiguration__optionListItem .productConfiguration__selectVariant[data-product-size="${process.env.BIKE_SIZE}"]`)
 
-            isBikeAvailableToBuy = !desiredSize.includes('Notify')
+            let desiredSize: string | null = null
+            if (element) {
+                desiredSize = element.innerHTML
+                isBikeAvailableToBuy = !desiredSize.includes('Notify')
+            }
 
             if (isBikeAvailableToBuy) {
                 await sendMessage('The wait is over, your bike is in stock! Go to ' + url)
@@ -82,10 +85,10 @@ const checkBikeAvailability = async (): Promise<void> => {
             console.error('There seems to be an error:', error)
         }
     }
-    log('End monitoring');
+    log('End monitoring')
 };
 
 app.listen(port, (): void => {
-    sendMessage(`Starting monitoring for ${bikeUrls.length} bike(s) every ${interval} minute(s).`);
-    setInterval(checkBikeAvailability, interval * 60 * 1000);
+    sendMessage(`Starting monitoring for ${bikeUrls.length} bike(s) every ${interval} minute(s).`)
+    setInterval(checkBikeAvailability, interval * 60 * 1_000)
 });
