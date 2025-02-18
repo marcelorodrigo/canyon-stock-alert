@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node index.ts",
     "env": "cp .env.sample .env && open .env",
-    "test": "jest"
+    "test": "jest",
   },
   "repository": {
     "type": "git",

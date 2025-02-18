@@ -5,7 +5,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 if(!fs.existsSync('.env')) {
-    console.error('It looks like the .env file does not exist. Please run `npm run env` to create it.')
+    console.error('It looks like the .env file does not exist. Please run `pnpm run env` to create it.')
     process.exit(1)
 }
 
